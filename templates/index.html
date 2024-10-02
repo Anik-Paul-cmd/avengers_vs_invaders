@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Superhero Email Query</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f0f0f0;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input[type="text"], select {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            background-color: #fff;
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        li button {
+            background-color: #28a745;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        li button:hover {
+            background-color: #218838;
+        }
+
+        .no-results {
+            text-align: center;
+            color: #999;
+            font-style: italic;
+            font-weight: bold;
+        }
+    </style>
+    <script>
+        function filterOptions(textInputId, selectId, hiddenInputId) {
+            const filterText = document.getElementById(textInputId).value.toLowerCase();
+            const selectElement = document.getElementById(selectId);
+            const options = selectElement.options;
+            let found = false;
+            for (let i = 0; i < options.length; i++) {
+                const option = options[i];
+                if (option.text.toLowerCase() === filterText) {
+                    option.style.display = "";
+                    found = true;
+                    selectElement.value = option.value;
+                    document.getElementById(hiddenInputId).value = option.value;
+                } else if (option.text.toLowerCase().includes(filterText)) {
+                    option.style.display = "";
+                } else {
+                    option.style.display = "none";
+                }
+            }
+            if (!found) {
+                document.getElementById(hiddenInputId).value = filterText;
+            }
+        }
+
+        function validateForm() {
+            const countryText = document.getElementById("country_text").value.trim();
+            const countrySelect = document.getElementById("country").value;
+            const invaderSpeciesText = document.getElementById("invader_species_text").value.trim();
+            const invaderSpeciesSelect = document.getElementById("invader_species").value;
+            const roleText = document.getElementById("role_text").value.trim();
+            const roleSelect = document.getElementById("role").value;
+
+            if (!countryText && !countrySelect) {
+                alert("Please enter or select a country.");
+                return false;
+            }
+            if (!invaderSpeciesText && !invaderSpeciesSelect) {
+                alert("Please enter or select an invader species.");
+                return false;
+            }
+            if (!roleText && !roleSelect) {
+                alert("Please enter or select a role.");
+                return false;
+            }
+            return true;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('country_text').addEventListener('input', () => filterOptions('country_text', 'country', 'country_hidden'));
+            document.getElementById('invader_species_text').addEventListener('input', () => filterOptions('invader_species_text', 'invader_species', 'invader_species_hidden'));
+            document.getElementById('role_text').addEventListener('input', () => filterOptions('role_text', 'role', 'role_hidden'));
+        });
+    </script>
+</head>
+<body>
+    <h1>Superhero Email Query</h1>
+    <form action="/query" method="post" onsubmit="return validateForm();">
+        <label for="country">Country:</label>
+        <input type="text" id="country_text" name="country_text" placeholder="Enter country">
+        <input type="hidden" id="country_hidden" name="country">
+        <select id="country" onchange="document.getElementById('country_hidden').value = this.value;">
+            <option value="">Select country</option>
+            {% for country in countries %}
+            <option value="{{ country }}">{{ country }}</option>
+            {% endfor %}
+        </select>
+        
+        <label for="invader_species">Invader Species:</label>
+        <input type="text" id="invader_species_text" name="invader_species_text" placeholder="Enter invader species">
+        <input type="hidden" id="invader_species_hidden" name="invader_species">
+        <select id="invader_species" onchange="document.getElementById('invader_species_hidden').value = this.value;">
+            <option value="">Select invader species</option>
+            <option value="aliens">Aliens</option>
+            <option value="predators">Predators</option>
+            <option value="d&d_beholder">D&D Beholder</option>
+            <option value="d&d_devil">D&D Devil</option>
+            <option value="d&d_lich">D&D Lich</option>
+            <option value="d&d_mind_flayer">D&D Mind Flayer</option>
+            <option value="d&d_vampire">D&D Vampire</option>
+            <option value="d&d_red_dragon">D&D Red Dragon</option>
+            <option value="d&d_hill_giant">D&D Hill Giant</option>
+            <option value="d&d_treant">D&D Treant</option>
+            <option value="d&d_werewolf">D&D Werewolf</option>
+            <option value="d&d_yuan-ti">D&D Yuan-Ti</option>
+        </select>
+        
+        <label for="role">Role:</label>
+        <input type="text" id="role_text" name="role_text" placeholder="Enter role">
+        <input type="hidden" id="role_hidden" name="role">
+        <select id="role" onchange="document.getElementById('role_hidden').value = this.value;">
+            <option value="">Select role</option>
+            <option value="attack_role">Attack Role</option>
+            <option value="defense_role">Defense Role</option>
+            <option value="healing_role">Healing Role</option>
+        </select>
+        
+        <button type="submit">Query</button>
+    </form>
+
+    {% if emails is defined %}
+        {% if emails|length == 0 %}
+            <p class="no-results"><strong>No Avenger Email found</strong></p>
+        {% else %}
+            <h2>Superhero Emails:</h2>
+            <ul>
+                {% for email in emails %}
+                <li>
+                    {{ email }}
+                    <button onclick="location.href='/dashboard/{{ email.split('@')[0] }}'">This Avenger's Homepage</button>
+                </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endif %}
+</body>
+</html>

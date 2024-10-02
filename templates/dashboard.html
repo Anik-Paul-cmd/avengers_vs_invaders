@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ superhero }} Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        nav {
+            background-color: #007bff;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        nav ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        nav ul li {
+            display: inline-block;
+            margin-right: 15px;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        nav ul li form {
+            display: inline-block;
+        }
+
+        nav ul li input[type="text"] {
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        nav ul li button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        nav ul li button:hover {
+            background-color: #218838;
+        }
+
+        nav ul li select {
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 15px;
+            cursor: pointer;
+            margin: 10px 0;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #likeCount {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid #ccc;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        tbody tr:nth-child(odd) {
+            background-color: #f9f9f9;
+        }
+
+        a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        canvas {
+            display: block;
+            margin: 0 auto;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        function filterSuperheroes() {
+            const filterText = document.getElementById("superhero_text").value.toLowerCase();
+            const options = document.getElementById("superhero_select").options;
+            let matchFound = false;
+            for (let i = 0; i < options.length; i++) {
+                const option = options[i];
+                if (option.text.toLowerCase().includes(filterText)) {
+                    option.style.display = "";
+                    if (option.text.toLowerCase() === filterText) {
+                        document.getElementById("superhero_select").value = option.value;
+                        matchFound = true;
+                    }
+                } else {
+                    option.style.display = "none";
+                }
+            }
+            return matchFound;
+        }
+
+        function showTrendingChart(role) {
+            fetch(`/get_trending_data/{{ superhero }}/${role}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const ctx = document.getElementById('trendingChart').getContext('2d');
+                    if (window.myChart) {
+                        window.myChart.destroy();
+                    }
+                    window.myChart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: ['1 months ago', '2 months ago', '3 months ago', '4 months ago', '5 months ago', '6 months ago', '7 months ago', '8 months ago', '9 months ago', '10 month ago'],
+                            datasets: [{
+                                label: `Invaders defeated by {{ superhero }} (${role})`,
+                                data: data,
+                                borderColor: 'rgba(70, 182, 192, 1)',
+                                borderWidth: 2,
+                                fill: false
+                            }]
+                        },
+                        options: {
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            }
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching trending data:', error);
+                });
+        }
+
+        function likeSuperhero() {
+            fetch(`/like/{{ superhero }}`, {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('likeCount').innerText = data;
+            });
+        }
+
+        function filterAndShowSuperheroes() {
+            const matchFound = filterSuperheroes();
+            if (!matchFound) {
+                alert('No matching superhero found');
+            } else {
+                const selectedSuperhero = document.getElementById("superhero_select").value;
+                if (selectedSuperhero) {
+                    location.href = selectedSuperhero;
+                }
+            }
+        }
+
+        function goToSuperheroDashboard() {
+            const selectedSuperhero = document.getElementById("superhero_select").value;
+            if (selectedSuperhero) {
+                location.href = selectedSuperhero;
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <nav>
+            <ul>
+                {% if show_search %}
+                <li style="display:inline-block;">
+                    <a href="/">Search for Avenger</a>
+                </li>
+                <li style="display:inline-block;">
+                    <form id="search_form" action="/search_superhero" method="post" style="display:inline;">
+                        <input type="text" id="superhero_text" name="superhero_text" placeholder="Enter superhero name" onkeyup="filterSuperheroes()">
+                        <button type="button" onclick="filterAndShowSuperheroes()">Search</button>
+                        <select id="superhero_select" onchange="goToSuperheroDashboard()">
+                            <option value="">Select superhero</option>
+                            {% for hero in superheroes %}
+                            <option value="/dashboard/{{ hero }}">{{ hero }}</option>
+                            {% endfor %}
+                        </select>
+                    </form>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+
+        <h1>{{ superhero }} Dashboard</h1>
+        <button onclick="likeSuperhero()">Thumb Up</button> <span id="likeCount">{{ like_counts[superhero] }}</span>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Species</th>
+                        <th>For trending chart click one of A/D/H/AD/AH/DH/ADH</th>
+                        <th>HQ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in data %}
+                    <tr>
+                        <td>{{ item.Species }}</td>
+                        <td>
+                            {% for shorthand in item.Shorthand.split(', ') %}
+                            <a href="javascript:void(0);" onclick="showTrendingChart('{{ shorthand }}')">{{ shorthand }}</a>
+                            {% endfor %}
+                        </td>
+                        <td>{{ item.HQ }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <canvas id="trendingChart" width="400" height="200"></canvas>
+    </div>
+</body>
+</html>
